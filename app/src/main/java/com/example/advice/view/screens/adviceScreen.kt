@@ -96,7 +96,6 @@ fun AdviceScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    val adviceList by adviceViewModule.advice.collectAsState()
     val snackBarHostState = remember { SnackbarHostState() }
 
     val isLoading by adviceViewModule.isLoading.collectAsState()
@@ -106,22 +105,8 @@ fun AdviceScreen(
     var openDialog by remember { mutableStateOf(false) }
     var deleteAdvice by remember { mutableStateOf<AdviceEntity?>(null) }
     val lazyListState = rememberLazyListState()
-    var showButton by remember { mutableStateOf(true) }
 
     val favorites by adviceViewModule.favorite.collectAsState()
-
-    LaunchedEffect(lazyListState.isScrollInProgress) {
-        snapshotFlow { lazyListState.isScrollInProgress }
-            .collect { isScroling ->
-                if (isScroling) {
-                    showButton = false
-                } else {
-                    delay(700)
-                    showButton = true
-                }
-            }
-
-    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -197,7 +182,7 @@ fun AdviceScreen(
             },
 
             ) { paddingValues ->
-            when (adviceState) {
+            when (val state = adviceState) {
                 is AdviceState.Loading -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -208,21 +193,18 @@ fun AdviceScreen(
                 }
 
                 is AdviceState.Error -> {
-                    val error = (adviceState as AdviceState.Error).message
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = error, fontSize = 20.sp,
+                            text =state.message, fontSize = 20.sp,
                             color = Color.Red
                         )
                     }
                 }
 
                 is AdviceState.Success -> {
-                    val advices = (adviceState as AdviceState.Success).adviceList
-
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -250,7 +232,7 @@ fun AdviceScreen(
                                         fontWeight = FontWeight.Bold
                                     )
                                 }
-                                items(advices) { advice ->
+                                items(state.adviceList) { advice ->
                                     AdviceCard(
                                         advice = advice,
                                         onclickDelete = {
@@ -291,6 +273,7 @@ fun AdviceScreen(
         }
     }
 }
+
 
 @Composable
 fun AdviceCard(
@@ -403,5 +386,4 @@ fun FavoriteCard(
             )
         }
     }
-
 }

@@ -48,33 +48,26 @@ class AdviceViewModule @Inject constructor(
     val advice: StateFlow<List<AdviceEntity>> = _advice.asStateFlow()
 
     init {
-        fetchAdviceFromDb()
+       loadAdvise()
         loadFavoriteAdvices()
     }
 
     fun loadAdvise() {
         viewModelScope.launch(Dispatchers.IO) {
+            _isLoading.value =true
             _uiState.value = AdviceState.Loading
             try {
                 val response = apiService.getRandomAdvice()
                 val newEntity = response.slip.toEntity(getCurrentData(), isFavorite = false)
                 insertAdviceRepository.addAdvice(newEntity)
-                fetchAdviceFromDb()
-                _advice.value = _advice.value + newEntity
+                val updateList = getAllAdviceRepository.getAllAdvice()
+                _advice.value=updateList
+                _uiState.value= AdviceState.Success(updateList)
 
             } catch (e: Exception) {
-                _uiState.value = AdviceState.Error(e.message ?: "Error")
-            }
-        }
-    }
-
-    fun fetchAdviceFromDb() {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val list = getAllAdviceRepository.getAllAdvice()
-                _uiState.value = AdviceState.Success(list)
-            }catch (e: Exception){
-                _uiState.value= AdviceState.Error(e.message?:"Error")
+                _uiState.value = AdviceState.Error(e.message?:"Error")
+            }finally {
+                _isLoading.value=false
             }
         }
     }
@@ -83,21 +76,27 @@ class AdviceViewModule @Inject constructor(
         viewModelScope.launch {
             deleteAllAdviceRepository.deleteAllAdvice()
             _advice.value = emptyList()
+            _uiState.value= AdviceState.Success(emptyList())
         }
     }
 
     fun deleteAdvice(adviceEntity: AdviceEntity) {
         viewModelScope.launch {
             deleteAdviceRepository.deleteAdvice(adviceEntity)
-            _advice.value = _advice.value.filterNot { it.id == adviceEntity.id }
+           val updateList = _advice.value.filterNot { it.id == adviceEntity.id }
+            _advice.value=updateList
+            _uiState.value= AdviceState.Success(updateList)
         }
     }
 
     fun addFavAdvice(adviceEntity: AdviceEntity) {
         viewModelScope.launch {
             addFavoriteAdviceRepository.addFavoriteAdvice(adviceEntity.id, !adviceEntity.isFavorite)
-            fetchAdviceFromDb()
             loadFavoriteAdvices()
+
+            val updateList = getAllAdviceRepository.getAllAdvice()
+            _advice.value=updateList
+            _uiState.value = AdviceState.Success(updateList)
         }
     }
 
@@ -108,6 +107,6 @@ class AdviceViewModule @Inject constructor(
     }
 
     fun getCurrentData(): String {
-        return SimpleDateFormat("<<dd.MM.yyyy HH:mm>>", Locale.getDefault()).format(Date())
+        return SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault()).format(Date())
     }
 }
