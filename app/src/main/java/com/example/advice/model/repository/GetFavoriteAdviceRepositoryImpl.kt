@@ -1,0 +1,11 @@
+package com.example.advice.model.repository
+
+import com.example.advice.model.room.advice.AdviceDao
+import com.example.advice.model.room.advice.AdviceEntity
+import javax.inject.Inject
+
+class GetFavoriteAdviceRepositoryImpl @Inject constructor (private val adviceDao: AdviceDao): GetFavoriteAdviceRepository {
+    override suspend fun getFavoriteAdvice(): List<AdviceEntity> {
+        return adviceDao.getFavoriteAdvice()
+    }
+}
