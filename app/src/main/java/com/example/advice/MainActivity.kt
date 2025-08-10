@@ -14,8 +14,6 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
            NavigationStack()
-
             }
         }
     }
-
