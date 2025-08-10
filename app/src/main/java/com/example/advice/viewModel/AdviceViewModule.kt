@@ -108,6 +108,6 @@ class AdviceViewModule @Inject constructor(
     }
 
     fun getCurrentData(): String {
-        return SimpleDateFormat("<<dd.MM.yyyy HH:mm>>", Locale.getDefault()).format(Date())
+        return SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault()).format(Date())
     }
 }

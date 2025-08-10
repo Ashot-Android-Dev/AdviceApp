@@ -403,5 +403,4 @@ fun FavoriteCard(
             )
         }
     }
-
 }
