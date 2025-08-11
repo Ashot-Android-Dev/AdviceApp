@@ -48,7 +48,7 @@ class AdviceViewModule @Inject constructor(
     val advice: StateFlow<List<AdviceEntity>> = _advice.asStateFlow()
 
     init {
-       loadAdvise()
+        fetchAdviceFromDb()
         loadFavoriteAdvices()
     }
 
@@ -68,6 +68,17 @@ class AdviceViewModule @Inject constructor(
                 _uiState.value = AdviceState.Error(e.message?:"Error")
             }finally {
                 _isLoading.value=false
+            }
+        }
+    }
+    fun fetchAdviceFromDb(){
+        viewModelScope.launch (Dispatchers.IO){
+            try {
+                val adviceList = getAllAdviceRepository.getAllAdvice()
+                _advice.value=adviceList
+                _uiState.value= AdviceState.Success(adviceList)
+            }catch (e: Exception){
+                _uiState.value= AdviceState.Error(e.message?:"Error")
             }
         }
     }

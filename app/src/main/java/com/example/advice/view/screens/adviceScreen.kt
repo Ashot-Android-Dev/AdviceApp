@@ -82,6 +82,8 @@ import kotlinx.coroutines.delay
 import com.example.advice.view.components.AlertDialog
 import com.example.advice.view.uiStates.AdviceState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.LinearProgressIndicator
+import com.example.advice.view.components.AdviceCard
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "ConfigurationScreenWidthHeight")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -101,6 +103,7 @@ fun AdviceScreen(
     val isLoading by adviceViewModule.isLoading.collectAsState()
 
     val adviceState by adviceViewModule.uiState.collectAsState()
+
 
     var openDialog by remember { mutableStateOf(false) }
 
@@ -190,7 +193,9 @@ fun AdviceScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator()
+                        CircularProgressIndicator(
+                            color = Color.Black
+                        )
                     }
                 }
 
@@ -200,7 +205,7 @@ fun AdviceScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text =state.message, fontSize = 20.sp,
+                            text = state.message, fontSize = 20.sp,
                             color = Color.Red
                         )
                     }
@@ -208,184 +213,71 @@ fun AdviceScreen(
 
                 is AdviceState.Success -> {
                     Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        PullToRefreshBox(
-                            isRefreshing = isLoading,
-                            onRefresh = { adviceViewModule.loadAdvise() }
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(paddingValues),
+                            contentAlignment = Alignment.Center,
                         ) {
-                            LazyColumn(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(PaddingValues(5.dp)),
-                                state = lazyListState,
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                item {
-                                    Text(
-                                        text = refreshText,
-                                        textAlign = TextAlign.Center,
-                                        fontSize = 20.sp,
-                                        color = Color.Black,
-                                        fontStyle = FontStyle.Italic,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                                items(state.adviceList) { advice ->
-                                    AdviceCard(
-                                        advice = advice,
-                                        onclickDelete = {
+                            PullToRefreshBox(
+                                isRefreshing = isLoading,
+                                onRefresh = { adviceViewModule.loadAdvise() },
 
-                                            deleteAdvice = advice
-                                            openDialog = true
-                                        },
-                                        onclickAddFavorite = {
-                                            adviceViewModule.addFavAdvice(advice)
-                                        },
-                                        dataTime = advice.dataTime
-                                    )
+                            ) {
+                                LazyColumn(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(PaddingValues(5.dp)),
+                                    state = lazyListState,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    item {
+                                        Text(
+                                            text = refreshText,
+                                            textAlign = TextAlign.Center,
+                                            fontSize = 20.sp,
+                                            color = Color.Black,
+                                            fontStyle = FontStyle.Italic,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                    items(state.adviceList) { advice ->
+                                        AdviceCard(
+                                            advice = advice,
+                                            onclickDelete = {
+
+                                                deleteAdvice = advice
+                                                openDialog = true
+                                            },
+                                            onclickAddFavorite = {
+                                                adviceViewModule.addFavAdvice(advice)
+                                            },
+                                            dataTime = advice.dataTime
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-            if (openDialog) {
-                AlertDialog(
-                    onConfirmation = {
-                        deleteAdvice?.let {
-                            adviceViewModule.deleteAdvice(it)
-                        }
-                        openDialog = false
-                        scope.launch {
-                            snackBarHostState.showSnackbar(
-                                message = "Deleted your note",
-                                duration = SnackbarDuration.Short
-                            )
-                        }
-                    },
-                    onDismissRequest = { openDialog = false },
-                    dialogText = alertDialogText,
-                    dialogTitle = alertDialogTitleText
-                )
-            }
         }
-    }
-}
-
-
-@Composable
-fun AdviceCard(
-    advice: AdviceEntity,
-    dataTime: String,
-    onclickDelete: (AdviceEntity) -> Unit,
-    onclickAddFavorite: (AdviceEntity) -> Unit,
-
-    ) {
-    var expanded by remember { mutableStateOf(false) }
-    val gradient = Brush.verticalGradient(listOf(Blue, Blue, Blue1))
-    ElevatedCard(
-        modifier = Modifier
-            .fillMaxWidth(0.95f)
-            .padding(top = 10.dp)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null
-            ) { expanded = !expanded }
-            .animateContentSize(),
-        shape = RoundedCornerShape(
-            topStart = 30.dp, topEnd = 8.dp,
-            bottomStart = 8.dp, bottomEnd = 30.dp
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-    ) {
-        Column(
-            modifier = Modifier
-                .background(brush = gradient)
-                .padding(12.dp)
-                .fillMaxWidth()
-        ) {
-            Text(
-                text = dataTime,
-                fontSize = 20.sp,
-                color = Color.White
-
-            )
-            HorizontalDivider(
-                modifier = Modifier.fillMaxWidth(),
-                color = Color.White
-            )
-            Text(
-                text = if (expanded) advice.advice else advice.advice.take(20) + "...",
-                style = MaterialTheme.typography.bodyLarge,
-                fontSize = 25.sp,
-                fontStyle = FontStyle.Italic,
-                color = Color.White,
-                letterSpacing = 2.sp,
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Absolute.SpaceBetween
-            ) {
-
-                IconButton(onClick = { onclickAddFavorite(advice) }) {
-                    Icon(
-                        imageVector = if (advice.isFavorite) Icons.Filled.Favorite
-                        else Icons.Filled.FavoriteBorder,
-                        tint = if (advice.isFavorite) Color.Black else Color.Black,
-                        contentDescription = ""
-                    )
-                }
-                IconButton(onClick = { onclickDelete(advice) }) {
-                    Icon(Icons.Filled.Delete, contentDescription = "")
-                }
-            }
-        }
-    }
-}
-
-
-@Composable
-fun FavoriteCard(
-    modifier: Modifier = Modifier,
-    favoriteText: String,
-    adviceEntity: AdviceEntity,
-) {
-    var expanded by remember { mutableStateOf(false) }
-    val gradient = Brush.verticalGradient(listOf(Blue, Blue, Blue1))
-
-    ElevatedCard(
-        modifier = Modifier
-            .fillMaxWidth(0.95f)
-            .padding(top = 10.dp)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null
-            ) { expanded = !expanded }
-            .animateContentSize(),
-        shape = RoundedCornerShape(
-            topStart = 30.dp, topEnd = 8.dp,
-            bottomStart = 8.dp, bottomEnd = 30.dp
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-    ) {
-        Column(
-            modifier = Modifier
-                .background(brush = gradient)
-                .padding(12.dp)
-                .fillMaxWidth()
-        ) {
-            Text(
-                text = if (expanded) adviceEntity.advice else adviceEntity.advice.take(20) + "...",
-                style = MaterialTheme.typography.bodyLarge,
-                fontSize = 25.sp,
-                fontStyle = FontStyle.Italic,
-                color = Color.White,
-                letterSpacing = 2.sp,
+        if (openDialog) {
+            AlertDialog(
+                onConfirmation = {
+                    deleteAdvice?.let {
+                        adviceViewModule.deleteAdvice(it)
+                    }
+                    openDialog = false
+                    scope.launch {
+                        snackBarHostState.showSnackbar(
+                            message = "Deleted your note",
+                            duration = SnackbarDuration.Short
+                        )
+                    }
+                },
+                onDismissRequest = { openDialog = false },
+                dialogText = alertDialogText,
+                dialogTitle = alertDialogTitleText
             )
         }
     }
-}

@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.advice.ui.theme.Blue
+import com.example.advice.view.components.FavoriteCard
 import com.example.advice.view.navHost.Route
 import com.example.advice.viewModel.AdviceViewModule
 
