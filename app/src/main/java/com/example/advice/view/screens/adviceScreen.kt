@@ -103,7 +103,9 @@ fun AdviceScreen(
     val adviceState by adviceViewModule.uiState.collectAsState()
 
     var openDialog by remember { mutableStateOf(false) }
+
     var deleteAdvice by remember { mutableStateOf<AdviceEntity?>(null) }
+
     val lazyListState = rememberLazyListState()
 
     val favorites by adviceViewModule.favorite.collectAsState()
