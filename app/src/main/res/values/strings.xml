@@ -8,4 +8,5 @@
     <string name="dialogTitle">Delete Advice</string>
     <string name="dialogText">Are you sure you want to delete this\nAdvice?</string>
     <string name="refreshText">  \"Swipe down to refresh and receive a new tip\" </string>
+    <string name="deletedAdvice">  \"Deleted your advice" </string>
 </resources>

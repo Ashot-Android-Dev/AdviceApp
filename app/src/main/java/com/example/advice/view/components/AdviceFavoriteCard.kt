@@ -13,6 +13,7 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,9 +34,17 @@ fun FavoriteCard(
     modifier: Modifier = Modifier,
     favoriteText: String,
     adviceEntity: AdviceEntity,
-) {
+    isScrolling: Boolean=true,
+
+    ) {
     var expanded by remember { mutableStateOf(false) }
     val gradient = Brush.verticalGradient(listOf(Blue, Blue, Blue1))
+
+    LaunchedEffect(isScrolling) {
+        if (isScrolling) {
+            expanded = false
+        }
+    }
 
     ElevatedCard(
         modifier = Modifier

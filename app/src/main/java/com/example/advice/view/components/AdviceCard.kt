@@ -22,6 +22,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,10 +44,18 @@ fun AdviceCard(
     dataTime: String,
     onclickDelete: (AdviceEntity) -> Unit,
     onclickAddFavorite: (AdviceEntity) -> Unit,
+    isScrolling: Boolean=true
 
     ) {
+
+
     var expanded by remember { mutableStateOf(false) }
     val gradient = Brush.verticalGradient(listOf(Blue, Blue, Blue1))
+    LaunchedEffect(isScrolling) {
+        if (isScrolling) {
+            expanded = false
+        }
+    }
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth(0.95f)

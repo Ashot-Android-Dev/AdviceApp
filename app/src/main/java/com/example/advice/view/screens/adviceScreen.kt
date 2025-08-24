@@ -83,6 +83,8 @@ import com.example.advice.view.components.AlertDialog
 import com.example.advice.view.uiStates.AdviceState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.ui.res.stringResource
 import com.example.advice.view.components.AdviceCard
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "ConfigurationScreenWidthHeight")
@@ -94,7 +96,11 @@ fun AdviceScreen(
     alertDialogTitleText: String = "",
     alertDialogText: String = "",
     refreshText: String = "",
+    dialogMessage: String=""
 ) {
+    val lazyListState = rememberLazyListState()
+    val isScrolling by remember { derivedStateOf { lazyListState.isScrollInProgress } }
+
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -109,7 +115,6 @@ fun AdviceScreen(
 
     var deleteAdvice by remember { mutableStateOf<AdviceEntity?>(null) }
 
-    val lazyListState = rememberLazyListState()
 
     val favorites by adviceViewModule.favorite.collectAsState()
 
@@ -251,7 +256,8 @@ fun AdviceScreen(
                                             onclickAddFavorite = {
                                                 adviceViewModule.addFavAdvice(advice)
                                             },
-                                            dataTime = advice.dataTime
+                                            dataTime = advice.dataTime,
+                                            isScrolling = isScrolling
                                         )
                                     }
                                 }
@@ -270,7 +276,7 @@ fun AdviceScreen(
                     openDialog = false
                     scope.launch {
                         snackBarHostState.showSnackbar(
-                            message = "Deleted your note",
+                            message = dialogMessage,
                             duration = SnackbarDuration.Short
                         )
                     }

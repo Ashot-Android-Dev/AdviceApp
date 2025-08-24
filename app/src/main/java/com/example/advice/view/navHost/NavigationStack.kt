@@ -30,6 +30,7 @@ fun NavigationStack(modifier: Modifier = Modifier) {
                 alertDialogText = stringResource(R.string.dialogText),
                 alertDialogTitleText = stringResource(R.string.dialogTitle),
                 refreshText = stringResource(R.string.refreshText),
+                dialogMessage = stringResource(R.string.deletedAdvice),
                 navController = navController
             )
         }
